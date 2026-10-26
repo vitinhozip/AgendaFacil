@@ -74,7 +74,9 @@ docs/             documentação de API gerada com pdoc
 
 ## Autoria
 
-Joackym Pedro Araujo Coelho - 2025002667
-Renato Augusto Silva - 20250061567
-Kleison Vitoriano da Silva - 2025006607
-Vitor Gabriel da Costa Sousa - 20250027387. Uso de ferramentas de IA declarado no `RELATORIO.md`.
+   - Joackym Pedro Araujo Coelho — 2025002667
+   - Renato Augusto Silva — 20250061567
+   - Kleison Vitoriano da Silva — 2025006607
+   - Vitor Gabriel da Costa Sousa — 20250027387
+
+   Uso de ferramentas de IA declarado no `RELATORIO.md`.
