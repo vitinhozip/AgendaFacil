@@ -4,12 +4,12 @@ DIM0501 — Boas Práticas de Programação · Prof. Marcus Terra · DIMAp/UFRN 
 
 | Integrantes (nome e matrícula) | Linguagem |
 |---|---|
-|Joackym Pedro Araujo Coelho - 2025002667|
-|Renato Augusto Silva - 20250061567|
-|Kleison Vitoriano da Silva - 2025006607|
-|Vitor Gabriel da Costa Sousa - 20250027387|Python 3.14 (só biblioteca padrão) 
+|Joackym Pedro Araujo Coelho - 2025002667|Python 3.10+ (testado em 3.14; só biblioteca padrão)|
+|Renato Augusto Silva - 20250061567|Python 3.10+ (testado em 3.14; só biblioteca padrão)|
+|Kleison Vitoriano da Silva - 2025006607|Python 3.10+ (testado em 3.14; só biblioteca padrão)|
+|Vitor Gabriel da Costa Sousa - 20250027387|Python 3.10+ (testado em 3.14; só biblioteca padrão)|
 
-Entregue em: [repositório ou arquivo compactado — preencher]
+Entregue em: https://github.com/vitinhozip/AgendaFacil
 
 ## 1. Diagnóstico do código-base
 
@@ -108,4 +108,4 @@ Remarcado
 | Pergunta | Resposta |
 |---|---|
 | Foram usadas ferramentas de IA neste trabalho? | (X) Sim |
-| Em quais etapas, e para quê? | Claude (Anthropic) foi usado para produzir uma primeira versão do projeto, como auxiliar de  código, gerou a documentação de API e também produziu o relatório.|
+| Em quais etapas, e para quê? | Claude (Anthropic) foi usado para produzir uma primeira versão do projeto, como auxiliar de código, gerou a documentação de API e também produziu o relatório.|
