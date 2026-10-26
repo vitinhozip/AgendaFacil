@@ -4,7 +4,7 @@ O módulo marca, remarca e lista atendimentos mantidos em memória. Toda
 entrada é validada antes do uso: entradas inválidas geram exceções
 específicas (ver :class:`AgendaError`) em vez de falhar em silêncio.
 
-Exemplo:
+Example:
     >>> agenda = Agenda()
     >>> atendimento = agenda.marcar("Ana", "Dr. Silva", "2026-10-05", 9, 30)
     >>> atendimento.hora
@@ -18,6 +18,7 @@ Para executar a demonstração::
 import re
 from dataclasses import dataclass, replace
 from datetime import datetime
+from typing import Any, Optional
 
 # --- Regras de negócio -------------------------------------------------------
 
@@ -73,12 +74,12 @@ class Atendimento:
     sem passar pelas validações de :class:`Agenda`.
 
     Attributes:
-        paciente: Nome do paciente.
-        profissional: Nome do profissional que atende.
-        data: Data no formato ``AAAA-MM-DD``.
-        hora: Hora de início, inteira, entre ``HORA_ABERTURA`` e 17.
-        duracao_minutos: Duração em minutos (15 a 120, múltiplo de 15).
-        status: Situação do atendimento.
+        paciente (str): Nome do paciente.
+        profissional (str): Nome do profissional que atende.
+        data (str): Data no formato ``AAAA-MM-DD``.
+        hora (int): Hora de início, inteira, entre ``HORA_ABERTURA`` e 17.
+        duracao_minutos (int): Duração em minutos (15 a 120, múltiplo de 15).
+        status (str): Situação do atendimento.
     """
 
     paciente: str
@@ -92,14 +93,14 @@ class Atendimento:
 # --- Validações (privadas): só verificam, nunca alteram a agenda -------------
 
 
-def _validar_texto(nome_campo, valor):
+def _validar_texto(nome_campo: str, valor: Any) -> None:
     if not isinstance(valor, str) or not valor.strip():
         raise EntradaInvalidaError(
             f"{nome_campo} deve ser um texto não vazio; recebido: {valor!r}"
         )
 
 
-def _validar_data(data):
+def _validar_data(data: Any) -> None:
     # strptime sozinho aceita "2026-1-5"; a regex exige o formato com zeros.
     if not isinstance(data, str) or not PADRAO_DATA.fullmatch(data):
         raise EntradaInvalidaError(
@@ -113,7 +114,7 @@ def _validar_data(data):
         ) from None
 
 
-def _validar_inteiro(nome_campo, valor):
+def _validar_inteiro(nome_campo: str, valor: Any) -> None:
     # bool é subclasse de int em Python; True não é uma hora válida.
     if not isinstance(valor, int) or isinstance(valor, bool):
         raise EntradaInvalidaError(
@@ -121,7 +122,7 @@ def _validar_inteiro(nome_campo, valor):
         )
 
 
-def _validar_duracao(duracao_minutos):
+def _validar_duracao(duracao_minutos: Any) -> None:
     _validar_inteiro("duracao_minutos", duracao_minutos)
     fora_do_intervalo = not (
         DURACAO_MINIMA_MINUTOS <= duracao_minutos <= DURACAO_MAXIMA_MINUTOS
@@ -134,7 +135,7 @@ def _validar_duracao(duracao_minutos):
         )
 
 
-def _validar_expediente(hora, duracao_minutos):
+def _validar_expediente(hora: Any, duracao_minutos: int) -> None:
     _validar_inteiro("hora", hora)
     if hora < HORA_ABERTURA:
         raise EntradaInvalidaError(
@@ -159,21 +160,29 @@ class Agenda:
     Os dados vivem apenas enquanto o objeto existir (sem banco de dados).
     """
 
-    def __init__(self):
-        self._atendimentos = []
+    def __init__(self) -> None:
+        self._atendimentos: list[Atendimento] = []
 
-    def marcar(self, paciente, profissional, data, hora, duracao_minutos):
+    def marcar(
+        self,
+        paciente: str,
+        profissional: str,
+        data: str,
+        hora: int,
+        duracao_minutos: int,
+    ) -> Atendimento:
         """Marca um novo atendimento.
 
         Args:
-            paciente: Nome do paciente (texto não vazio).
-            profissional: Nome do profissional (texto não vazio).
-            data: Data no formato ``AAAA-MM-DD``.
-            hora: Hora de início, inteira (8 a 17).
-            duracao_minutos: Duração em minutos (15 a 120, múltiplo de 15).
+            paciente (str): Nome do paciente (texto não vazio).
+            profissional (str): Nome do profissional (texto não vazio).
+            data (str): Data no formato ``AAAA-MM-DD``.
+            hora (int): Hora de início, inteira (8 a 17).
+            duracao_minutos (int): Duração em minutos (15 a 120, múltiplo
+                de 15).
 
         Returns:
-            O :class:`Atendimento` criado, com status ``MARCADO``.
+            Atendimento: O atendimento criado, com status ``MARCADO``.
 
         Raises:
             EntradaInvalidaError: Se algum argumento violar o formato ou o
@@ -197,7 +206,14 @@ class Agenda:
         self._atendimentos.append(atendimento)
         return atendimento
 
-    def remarcar(self, paciente, data, hora, nova_data, nova_hora):
+    def remarcar(
+        self,
+        paciente: str,
+        data: str,
+        hora: int,
+        nova_data: str,
+        nova_hora: int,
+    ) -> Atendimento:
         """Muda a data e a hora de um atendimento já marcado.
 
         A duração e o profissional do atendimento são mantidos. Remarcar
@@ -205,14 +221,14 @@ class Agenda:
         altera nada.
 
         Args:
-            paciente: Nome do paciente do atendimento a remarcar.
-            data: Data atual do atendimento (``AAAA-MM-DD``).
-            hora: Hora atual do atendimento.
-            nova_data: Nova data (``AAAA-MM-DD``).
-            nova_hora: Nova hora de início, inteira.
+            paciente (str): Nome do paciente do atendimento a remarcar.
+            data (str): Data atual do atendimento (``AAAA-MM-DD``).
+            hora (int): Hora atual do atendimento.
+            nova_data (str): Nova data (``AAAA-MM-DD``).
+            nova_hora (int): Nova hora de início, inteira.
 
         Returns:
-            O :class:`Atendimento` já com a nova data e hora.
+            Atendimento: O atendimento já com a nova data e hora.
 
         Raises:
             EntradaInvalidaError: Se algum argumento violar o formato ou, na
@@ -243,14 +259,15 @@ class Agenda:
         self._atendimentos[posicao] = remarcado
         return remarcado
 
-    def listar_por_data(self, data):
+    def listar_por_data(self, data: str) -> list[Atendimento]:
         """Lista os atendimentos de um dia, na ordem em que foram marcados.
 
         Args:
-            data: Data no formato ``AAAA-MM-DD``.
+            data (str): Data no formato ``AAAA-MM-DD``.
 
         Returns:
-            Lista de :class:`Atendimento` da data. Vazia se não houver nenhum.
+            list[Atendimento]: Atendimentos da data. Vazia se não houver
+            nenhum.
 
         Raises:
             EntradaInvalidaError: Se ``data`` não estiver no formato correto.
@@ -258,7 +275,13 @@ class Agenda:
         _validar_data(data)
         return [a for a in self._atendimentos if a.data == data]
 
-    def _existe_conflito(self, profissional, data, hora, ignorar=None):
+    def _existe_conflito(
+        self,
+        profissional: str,
+        data: str,
+        hora: int,
+        ignorar: Optional[Atendimento] = None,
+    ) -> bool:
         # Decisão: conflito = mesmo profissional, dia e hora de INÍCIO, como
         # define a regra de negócio. Não detectamos sobreposição por duração
         # (ex.: 9h com 90 min e outro às 10h); isso exigiria uma regra nova.
@@ -270,7 +293,7 @@ class Agenda:
             for a in self._atendimentos
         )
 
-    def _localizar(self, paciente, data, hora):
+    def _localizar(self, paciente: str, data: str, hora: int) -> int:
         for posicao, atendimento in enumerate(self._atendimentos):
             if (
                 atendimento.paciente == paciente
@@ -286,14 +309,15 @@ class Agenda:
 # --- Apresentação e demonstração ---------------------------------------------
 
 
-def formatar_atendimento(atendimento):
+def formatar_atendimento(atendimento: Atendimento) -> str:
     """Formata um atendimento como ``hora paciente profissional status``.
 
     Args:
-        atendimento: O atendimento a exibir.
+        atendimento (Atendimento): O atendimento a exibir.
 
     Returns:
-        Texto de uma linha, por exemplo ``"14 Carla Dra. Souza MARCADO"``.
+        str: Texto de uma linha, por exemplo
+        ``"14 Carla Dra. Souza MARCADO"``.
     """
     return (
         f"{atendimento.hora} {atendimento.paciente} "
@@ -301,19 +325,26 @@ def formatar_atendimento(atendimento):
     )
 
 
-def marcar_e_informar(agenda, paciente, profissional, data, hora, duracao):
+def marcar_e_informar(
+    agenda: Agenda,
+    paciente: str,
+    profissional: str,
+    data: str,
+    hora: int,
+    duracao: int,
+) -> None:
     """Marca um atendimento e imprime o resultado para o usuário.
 
     Conflito de horário é um resultado esperado da demonstração e vira
     mensagem; entradas inválidas continuam propagando a exceção.
 
     Args:
-        agenda: A agenda onde marcar.
-        paciente: Nome do paciente.
-        profissional: Nome do profissional.
-        data: Data no formato ``AAAA-MM-DD``.
-        hora: Hora de início.
-        duracao: Duração em minutos.
+        agenda (Agenda): A agenda onde marcar.
+        paciente (str): Nome do paciente.
+        profissional (str): Nome do profissional.
+        data (str): Data no formato ``AAAA-MM-DD``.
+        hora (int): Hora de início.
+        duracao (int): Duração em minutos.
 
     Raises:
         EntradaInvalidaError: Se algum argumento for inválido.
@@ -326,16 +357,23 @@ def marcar_e_informar(agenda, paciente, profissional, data, hora, duracao):
         print(MENSAGEM_ATENDIMENTO_MARCADO, paciente)
 
 
-def remarcar_e_informar(agenda, paciente, data, hora, nova_data, nova_hora):
+def remarcar_e_informar(
+    agenda: Agenda,
+    paciente: str,
+    data: str,
+    hora: int,
+    nova_data: str,
+    nova_hora: int,
+) -> None:
     """Remarca um atendimento e imprime o resultado para o usuário.
 
     Args:
-        agenda: A agenda onde remarcar.
-        paciente: Nome do paciente.
-        data: Data atual do atendimento.
-        hora: Hora atual do atendimento.
-        nova_data: Nova data.
-        nova_hora: Nova hora de início.
+        agenda (Agenda): A agenda onde remarcar.
+        paciente (str): Nome do paciente.
+        data (str): Data atual do atendimento.
+        hora (int): Hora atual do atendimento.
+        nova_data (str): Nova data.
+        nova_hora (int): Nova hora de início.
 
     Raises:
         EntradaInvalidaError: Se algum argumento for inválido.
@@ -349,12 +387,12 @@ def remarcar_e_informar(agenda, paciente, data, hora, nova_data, nova_hora):
         print(MENSAGEM_REMARCADO)
 
 
-def listar_e_informar(agenda, data):
+def listar_e_informar(agenda: Agenda, data: str) -> None:
     """Imprime os atendimentos de uma data, um por linha.
 
     Args:
-        agenda: A agenda a consultar.
-        data: Data no formato ``AAAA-MM-DD``.
+        agenda (Agenda): A agenda a consultar.
+        data (str): Data no formato ``AAAA-MM-DD``.
 
     Raises:
         EntradaInvalidaError: Se ``data`` for inválida.
@@ -363,7 +401,7 @@ def listar_e_informar(agenda, data):
         print(formatar_atendimento(atendimento))
 
 
-def executar_demonstracao():
+def executar_demonstracao() -> None:
     """Executa o cenário de demonstração do código-base original."""
     agenda = Agenda()
     marcar_e_informar(agenda, "Ana", "Dr. Silva", "2026-10-05", 9, 30)
